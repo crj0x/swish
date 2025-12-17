@@ -1,5 +1,6 @@
 #include <iostream>
 #include <string>
+#include <sstream>
 
 int main()
 {
@@ -9,15 +10,44 @@ int main()
 
   while (true)
   {
-    // TODO: Uncomment the code below to pass the first stage
+    // print the prompt
     std::cout << "$ ";
 
-    std::string command;
-    std::getline(std::cin, command);
-    if (command == "exit")
+    // take the input for the input string
+    std::string input_line;
+    std::getline(std::cin, input_line);
+
+    // wrap the string in a string stream to parse it
+    std::stringstream tokenizer(input_line);
+
+    // extract the first word in the stream
+    std::string cmd_name;
+    tokenizer >> cmd_name;
+
+    if (cmd_name == "exit")
     {
       break;
     }
-    std::cout << command << ": command not found" << std::endl;
+    else if (cmd_name == "echo")
+    {
+      std::string current_arg;
+      bool is_first_arg = true;
+
+      while (tokenizer >> current_arg)
+      {
+        if (!is_first_arg)
+        {
+          std::cout << ' ';
+        }
+        std::cout << current_arg;
+        is_first_arg = false;
+      }
+      // the last new line character at the end
+      std::cout << std::endl;
+    }
+    else
+    {
+      std::cout << cmd_name << ": command not found" << std::endl;
+    }
   }
 }
