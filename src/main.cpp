@@ -20,7 +20,7 @@ int main()
   std::cout << std::unitbuf;
   std::cerr << std::unitbuf;
 
-  std::unordered_set<std::string> builtins = {"exit", "echo", "type"};
+  std::unordered_set<std::string> builtins = {"exit", "echo", "type", "pwd"};
 
   while (true)
   {
@@ -120,6 +120,11 @@ int main()
           std::cout << type_arg << ": not found" << std::endl;
         }
       }
+    }
+    else if (cmd_name == "pwd")
+    {
+      std::filesystem::path current_path = std::filesystem::current_path();
+      std::cout << current_path.string() << std::endl;
     }
     else
     {
