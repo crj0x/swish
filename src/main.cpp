@@ -18,14 +18,27 @@ const char PATH_DELIMITER = ':';
 
 std::vector<std::string> parse_input(const std::string &input)
 {
+  // supports cases like echo 'hello''world' -> ["echo", "helloworld"]
   std::vector<std::string> args;
+  std::string token = "";
 
   bool in_single_quotes = false;
-  std::string token = "";
+  bool in_double_quotes = false;
+
   for (size_t i = 0; i < input.size(); i++)
   {
-    char current_char = input[i];
-    if (in_single_quotes)
+    if (in_double_quotes)
+    {
+      if (input[i] == '\"')
+      {
+        in_double_quotes = false;
+      }
+      else
+      {
+        token += input[i];
+      }
+    }
+    else if (in_single_quotes)
     {
       if (input[i] == '\'')
       {
@@ -43,6 +56,10 @@ std::vector<std::string> parse_input(const std::string &input)
       {
         continue;
       }
+      else if (input[i] == '"')
+      {
+        in_double_quotes = true;
+      }
       else if (input[i] == '\'')
       {
         in_single_quotes = true;
@@ -58,7 +75,10 @@ std::vector<std::string> parse_input(const std::string &input)
       }
     }
   }
-  args.push_back(token);
+  if (token != "")
+  {
+    args.push_back(token);
+  }
 
   return args;
 }
