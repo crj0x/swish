@@ -9,12 +9,7 @@
 #include <functional>
 #include <map>
 
-// preprocessor macro to detect the platform
-#ifdef _WIN32
-const char PATH_DELIMITER = ';';
-#else
 const char PATH_DELIMITER = ':';
-#endif
 
 std::vector<std::string> parse_input(const std::string &input)
 {
