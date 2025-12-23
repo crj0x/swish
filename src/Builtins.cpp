@@ -9,7 +9,7 @@
 using CommandHandler = std::function<void(const std::vector<std::string> &args)>;
 
 const std::unordered_set<std::string> builtin_names = {"exit", "echo", "type", "pwd", "cd"};
-const std::map<std::string, CommandHandler> builtins = {
+const std::unordered_map<std::string, CommandHandler> builtins = {
     {"exit", handle_exit},
     {"echo", handle_echo},
     {"pwd", handle_pwd},
