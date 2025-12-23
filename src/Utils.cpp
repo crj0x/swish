@@ -1,25 +1,47 @@
 #include "Utils.hpp"
 
+#include <iostream>
 #include <filesystem>
 #include <cstdlib>  // for std::getenv
 #include <unistd.h> // for POSIX access()
 
 const char PATH_DELIMITER = ':';
 
-std::vector<std::string> parse_input(const std::string &input)
+std::vector<std::string> take_input()
 {
-  // supports cases like echo 'hello''world' -> ["echo", "helloworld"]
+  tokenizer_status status = {false, false, false, true, ""};
   std::vector<std::string> args;
-  std::string token = "";
 
-  bool in_single_quotes = false;
-  bool in_double_quotes = false;
+  // take the input for the input string
+  std::string input_line;
+  getline(std::cin, input_line);
+  status = tokenize_string(args, status, input_line);
+  while (status.take_input_again)
+  {
+    std::cout << "> ";
+    getline(std::cin, input_line);
+    status = tokenize_string(args, status, input_line);
+  }
+
+  return args;
+}
+
+// simply parses the string "input" provided to it and tokenizes it
+// returns a status about whether we need to keep taking in the input.
+tokenizer_status tokenize_string(std::vector<std::string> &args, tokenizer_status status, const std::string &input)
+{
+  // supports cases like echo "hello""world" -> ["echo", "helloworld"]
+  std::string &token = status.token;
+  bool &in_single_quotes = status.in_single_quotes;
+  bool &in_double_quotes = status.in_double_quotes;
+  bool &in_backslash = status.in_backslash;
+  bool &take_input_again = status.take_input_again;
 
   for (size_t i = 0; i < input.size(); i++)
   {
     if (in_double_quotes)
     {
-      if (input[i] == '\"')
+      if (input[i] == '"')
       {
         in_double_quotes = false;
       }
@@ -39,6 +61,11 @@ std::vector<std::string> parse_input(const std::string &input)
         token += input[i];
       }
     }
+    else if (in_backslash)
+    {
+      token += input[i];
+      in_backslash = false;
+    }
     else
     {
       // ignore spaces if previous was also space
@@ -54,6 +81,10 @@ std::vector<std::string> parse_input(const std::string &input)
       {
         in_single_quotes = true;
       }
+      else if (input[i] == '\\')
+      {
+        in_backslash = true;
+      }
       else if (input[i] == ' ')
       {
         args.push_back(token);
@@ -65,12 +96,24 @@ std::vector<std::string> parse_input(const std::string &input)
       }
     }
   }
+  if (in_double_quotes || in_single_quotes)
+  {
+    token += '\n';
+    return status;
+  }
+  if (in_backslash)
+  {
+    return status;
+  }
   if (token != "")
   {
+    // aviod putting in "" because of whitespaces at the end of the input e.g. "echo hello     " -> ["echo", "hello"]
     args.push_back(token);
+    token = "";
   }
+  take_input_again = false;
 
-  return args;
+  return status;
 }
 
 bool is_executable(const std::string &path_str)

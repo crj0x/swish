@@ -16,16 +16,7 @@ int main()
     // print the prompt
     std::cout << "$ ";
 
-    // take the input for the input string
-    std::string input_line;
-    // handle EOF
-    if (!getline(std::cin, input_line))
-    {
-      std::cout << std::endl;
-      break;
-    }
-
-    std::vector<std::string> args = parse_input(input_line);
+    std::vector<std::string> args = take_input();
 
     if (args.size() == 0)
     {
