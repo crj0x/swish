@@ -6,6 +6,7 @@
 #include <filesystem>
 #include <cstdlib>  // for std::getenv
 #include <unistd.h> // for POSIX access()
+#include <fcntl.h>  // for open() syscall
 #include <unordered_set>
 
 const char PATH_DELIMITER = ':';
@@ -140,6 +141,35 @@ tokenizer_status tokenize_string(std::vector<std::string> &args, tokenizer_statu
 
 void process_input(std::vector<std::string> &args)
 {
+  int file_fd;
+  int saved_stdout_fd;
+  bool found_redirection = false;
+  // write only, create if file doesnt exist, trucate the file if contents are already there (empty the file)
+  int flags = O_WRONLY | O_CREAT | O_TRUNC;
+  // read, write for user, read for group, read for others
+  int mode = S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH;
+
+  // TODO: the parser doesn't handle cases like "echo hello>a" for now it needs to have whitespaces in between
+  for (size_t i = 0; i < args.size(); i++)
+  {
+    // for now assuming that there WILL be an arguement after > or 1>
+    if (args[i] == ">" || args[i] == "1>")
+    {
+      found_redirection = true;
+      file_fd = open(args[i + 1].c_str(), flags, mode);
+
+      // create a new fd pointing to stdout
+      saved_stdout_fd = dup(STDOUT_FILENO);
+
+      // make original stdout fd point to the file
+      dup2(file_fd, STDOUT_FILENO);
+      close(file_fd);
+
+      args.erase(args.begin() + (i + 1)); // remove file name from args
+      args.erase(args.begin() + (i));     // remove operator from args
+    }
+  }
+
   if (args.size() == 0)
   {
     return;
@@ -154,6 +184,14 @@ void process_input(std::vector<std::string> &args)
   else
   {
     execute_external(args);
+  }
+
+  if (found_redirection)
+  {
+    // make original stdout fd point back to the stdout file description
+    dup2(saved_stdout_fd, STDOUT_FILENO);
+    // close the temporary saved_stdout_fd
+    close(saved_stdout_fd);
   }
 }
 

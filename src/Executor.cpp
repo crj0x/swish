@@ -19,11 +19,15 @@ void execute_external(const std::vector<std::string> &args)
   // run executables and pass arguements to them
   // here we can't use system() as it executes given command as a shell command
   // hence, defeating the purpose of creating a shell from scratch
+  // the cwd (current working directory) of the child process is also the same
+  // when we do this the FD (file descriptor) table is preserved
   pid_t child_pid = fork();
   if (child_pid == 0)
   {
     // child process
     // execvp literally turns the process to the new executable so the current code is completely gone from the child process
+    // the cwd (curent working directory even after execvp) remains the same
+    // when we do this the FD (file descriptor) table is preserved
     execvp(c_args[0], c_args.data());
 
     // If execvp returns, it failed (command not found/missing perms)
