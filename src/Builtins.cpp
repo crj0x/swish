@@ -21,6 +21,12 @@ int unsaved_hist_counter = 0;
 
 void handle_exit(const std::vector<std::string> &args)
 {
+  const char *histfile_env = std::getenv("HISTFILE");
+  if (histfile_env != nullptr)
+  {
+    // TODO: might be buggy due to limit on the no. of history commands in memory vs no. of history commands in the histfile
+    write_history(histfile_env);
+  }
   std::exit(0);
 }
 
