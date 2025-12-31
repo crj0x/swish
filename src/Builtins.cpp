@@ -7,13 +7,15 @@
 
 using CommandHandler = std::function<void(const std::vector<std::string> &args)>;
 
-const std::unordered_set<std::string> builtin_names = {"exit", "echo", "type", "pwd", "cd"};
+const std::unordered_set<std::string> builtin_names = {"exit", "echo", "pwd", "cd", "type", "history"};
 const std::unordered_map<std::string, CommandHandler> builtins = {
     {"exit", handle_exit},
     {"echo", handle_echo},
     {"pwd", handle_pwd},
     {"cd", handle_cd},
-    {"type", handle_type}};
+    {"type", handle_type},
+    {"history", handle_history}};
+std::vector<std::string> previous_commands;
 
 void handle_exit(const std::vector<std::string> &args)
 {
@@ -86,7 +88,6 @@ void handle_cd(const std::vector<std::string> &args)
 
 void handle_type(const std::vector<std::string> &args)
 {
-
   if (args.size() == 1)
   {
     std::cout << std::endl;
@@ -110,5 +111,22 @@ void handle_type(const std::vector<std::string> &args)
         std::cout << args[i] << " is " << full_path << std::endl;
       }
     }
+  }
+}
+
+void handle_history(const std::vector<std::string> &args)
+{
+  int i_digit_count = 1;
+  int next_digit_count_trigger = 10;
+  for (size_t i = 1; i <= previous_commands.size(); i++)
+  {
+    if (i == next_digit_count_trigger)
+    {
+      next_digit_count_trigger *= 10;
+      i_digit_count++;
+    }
+
+    std::string padding(5 - i_digit_count, ' ');
+    std::cout << padding << i << "  " << previous_commands[i - 1] << std::endl;
   }
 }

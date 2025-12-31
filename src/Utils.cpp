@@ -22,18 +22,22 @@ std::vector<std::string> take_input()
 {
   tokenizer_status status = {false, false, false, true, ""};
   std::vector<std::string> args;
+  std::string total_input = "";
 
   // take the input for the input string
   std::string input_line;
   getline(std::cin, input_line);
+  total_input += input_line;
   status = tokenize_string(args, status, input_line);
   while (status.take_input_again)
   {
     std::cout << "> ";
     getline(std::cin, input_line);
+    total_input += ("\n" + input_line);
     status = tokenize_string(args, status, input_line);
   }
 
+  previous_commands.push_back(total_input);
   return args;
 }
 
