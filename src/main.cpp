@@ -11,7 +11,6 @@ int main()
   // main REPL
   while (true)
   {
-    print_prompt();
     std::vector<std::string> args = take_input();
     process_input(args);
   }

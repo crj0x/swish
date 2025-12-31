@@ -9,6 +9,9 @@
 #include <fcntl.h>  // for open() syscall
 #include <unordered_set>
 
+#include <readline/readline.h>
+#include <readline/history.h>
+
 const char PATH_DELIMITER = ':';
 const std::unordered_set<char> escapable_in_double_quotes = {'"', '\\', '$', '`'}; // '\n' escaping is handled within the logic itself
 
@@ -25,19 +28,31 @@ std::vector<std::string> take_input()
   std::string total_input = "";
 
   // take the input for the input string
-  std::string input_line;
-  getline(std::cin, input_line);
+  char *buf = readline("$ ");
+  std::string input_line(buf);
+  free(buf);
+
   total_input += input_line;
   status = tokenize_string(args, status, input_line);
   while (status.take_input_again)
   {
-    std::cout << "> ";
-    getline(std::cin, input_line);
+    char *buf = readline("> ");
+    input_line = std::string(buf);
+    free(buf);
+
     total_input += ("\n" + input_line);
     status = tokenize_string(args, status, input_line);
   }
 
-  previous_commands.push_back(total_input);
+  if (total_input != "")
+  {
+    add_history(total_input.c_str());
+    // TODO: If i edit a command in "readline"'s history it is not updated in "previous_commands" vector.
+    // that edited command in history persists throughout executions (unless it is the one getting executed)
+    // but readline handles all of that for us
+    previous_commands.push_back(total_input);
+  }
+
   return args;
 }
 
