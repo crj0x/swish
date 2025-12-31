@@ -141,6 +141,28 @@ tokenizer_status tokenize_string(std::vector<std::string> &args, tokenizer_statu
 
 void process_input(std::vector<std::string> &args)
 {
+  bool found_pipeline = std::find(args.begin(), args.end(), "|") != args.end();
+  if (found_pipeline)
+  {
+    std::vector<std::vector<std::string>> commands;
+    std::vector<std::string> current_command;
+    for (size_t i = 0; i < args.size(); i++)
+    {
+      if (args[i] == "|")
+      {
+        commands.push_back(current_command);
+        current_command.clear();
+      }
+      else {
+        current_command.push_back(args[i]);
+      }
+    }
+    commands.push_back(current_command);
+
+    execute_pipeline(commands);
+    return;
+  }
+
   int file_fd;
   int saved_fd;
   bool found_redirection = false;
