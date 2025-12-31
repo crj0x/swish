@@ -5,6 +5,7 @@
 #include <iostream>
 #include <filesystem>
 #include <cmath>
+#include <readline/history.h>
 
 using CommandHandler = std::function<void(const std::vector<std::string> &args)>;
 
@@ -16,7 +17,6 @@ const std::unordered_map<std::string, CommandHandler> builtins = {
     {"cd", handle_cd},
     {"type", handle_type},
     {"history", handle_history}};
-std::vector<std::string> previous_commands;
 
 void handle_exit(const std::vector<std::string> &args)
 {
@@ -117,12 +117,14 @@ void handle_type(const std::vector<std::string> &args)
 
 void handle_history(const std::vector<std::string> &args)
 {
+  HIST_ENTRY **prev_commands = history_list();
+
   int i_digit_count = 1;
   int next_digit_count_trigger = 10;
   size_t start_point = 1;
-  if (args.size() == 2 && (std::stoi(args[1]) < previous_commands.size()))
+  if (args.size() == 2 && (std::stoi(args[1]) < history_length))
   {
-    start_point = previous_commands.size() - std::stoi(args[1]) + 1;
+    start_point = history_length - std::stoi(args[1]) + 1;
     int temp_start_point = start_point / 10;
     while (temp_start_point)
     {
@@ -132,7 +134,7 @@ void handle_history(const std::vector<std::string> &args)
     next_digit_count_trigger = pow(10, i_digit_count);
   }
 
-  for (size_t i = start_point; i <= previous_commands.size(); i++)
+  for (size_t i = start_point; i <= history_length; i++)
   {
     if (i == next_digit_count_trigger)
     {
@@ -142,6 +144,6 @@ void handle_history(const std::vector<std::string> &args)
 
     // padding is not robust here, it will break for more than 10^5 commands...
     std::string padding(5 - i_digit_count, ' ');
-    std::cout << padding << i << "  " << previous_commands[i - 1] << std::endl;
+    std::cout << padding << i << "  " << prev_commands[i - 1]->line << std::endl;
   }
 }

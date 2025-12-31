@@ -8,7 +8,6 @@
 using CommandHandler = std::function<void(const std::vector<std::string> &args)>;
 extern const std::unordered_set<std::string> builtin_names;
 extern const std::unordered_map<std::string, CommandHandler> builtins;
-extern std::vector<std::string> previous_commands;
 
 void handle_exit(const std::vector<std::string> &args);
 void handle_echo(const std::vector<std::string> &args);
