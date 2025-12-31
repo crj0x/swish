@@ -4,6 +4,7 @@
 #include <cstdlib> // for std::getenv, exit()
 #include <iostream>
 #include <filesystem>
+#include <cmath>
 
 using CommandHandler = std::function<void(const std::vector<std::string> &args)>;
 
@@ -118,7 +119,20 @@ void handle_history(const std::vector<std::string> &args)
 {
   int i_digit_count = 1;
   int next_digit_count_trigger = 10;
-  for (size_t i = 1; i <= previous_commands.size(); i++)
+  size_t start_point = 1;
+  if (args.size() == 2 && (std::stoi(args[1]) < previous_commands.size()))
+  {
+    start_point = previous_commands.size() - std::stoi(args[1]) + 1;
+    int temp_start_point = start_point / 10;
+    while (temp_start_point)
+    {
+      temp_start_point /= 10;
+      i_digit_count++;
+    }
+    next_digit_count_trigger = pow(10, i_digit_count);
+  }
+
+  for (size_t i = start_point; i <= previous_commands.size(); i++)
   {
     if (i == next_digit_count_trigger)
     {
@@ -126,6 +140,7 @@ void handle_history(const std::vector<std::string> &args)
       i_digit_count++;
     }
 
+    // padding is not robust here, it will break for more than 10^5 commands...
     std::string padding(5 - i_digit_count, ' ');
     std::cout << padding << i << "  " << previous_commands[i - 1] << std::endl;
   }
