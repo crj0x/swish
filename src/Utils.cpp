@@ -47,6 +47,7 @@ std::vector<std::string> take_input()
   if (total_input != "")
   {
     add_history(total_input.c_str());
+    unsaved_hist_counter++;
   }
 
   return args;

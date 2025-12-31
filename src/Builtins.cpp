@@ -17,6 +17,7 @@ const std::unordered_map<std::string, CommandHandler> builtins = {
     {"cd", handle_cd},
     {"type", handle_type},
     {"history", handle_history}};
+int unsaved_hist_counter = 0;
 
 void handle_exit(const std::vector<std::string> &args)
 {
@@ -117,6 +118,27 @@ void handle_type(const std::vector<std::string> &args)
 
 void handle_history(const std::vector<std::string> &args)
 {
+  if (args.size() == 3)
+  {
+    if (args[1] == "-r")
+    {
+      int temp = history_length;
+      read_history(args[2].c_str());
+      // TODO: bug in bash??? bash was not handling this correctly. look more into this
+      unsaved_hist_counter += history_length - temp;
+    }
+    else if (args[1] == "-w")
+    {
+      write_history(args[2].c_str());
+    }
+    else if (args[1] == "-a")
+    {
+      append_history(unsaved_hist_counter, args[2].c_str());
+      unsaved_hist_counter = 0;
+    }
+    return;
+  }
+
   HIST_ENTRY **prev_commands = history_list();
 
   int i_digit_count = 1;
