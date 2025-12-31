@@ -10,7 +10,7 @@
 #include <unordered_set>
 
 const char PATH_DELIMITER = ':';
-const std::unordered_set<char> escapable_in_double_quotes = {'"', '\\', '$', '`', '\n'};
+const std::unordered_set<char> escapable_in_double_quotes = {'"', '\\', '$', '`'}; // '\n' escaping is handled within the logic itself
 
 void print_prompt()
 {
@@ -52,7 +52,8 @@ tokenizer_status tokenize_string(std::vector<std::string> &args, tokenizer_statu
   {
     if (in_backslash)
     {
-      if (!in_double_quotes || escapable_in_double_quotes.count(input[i]))
+      // i = 0 here basically means we are escaping the previous '\n'
+      if (!in_double_quotes || escapable_in_double_quotes.count(input[i]) || i == 0)
       {
         token += input[i];
       }
@@ -119,13 +120,13 @@ tokenizer_status tokenize_string(std::vector<std::string> &args, tokenizer_statu
       }
     }
   }
+  if (in_backslash)
+  {
+    return status;
+  }
   if (in_double_quotes || in_single_quotes)
   {
     token += '\n';
-    return status;
-  }
-  if (in_backslash)
-  {
     return status;
   }
   if (token != "")
@@ -153,7 +154,8 @@ void process_input(std::vector<std::string> &args)
         commands.push_back(current_command);
         current_command.clear();
       }
-      else {
+      else
+      {
         current_command.push_back(args[i]);
       }
     }
